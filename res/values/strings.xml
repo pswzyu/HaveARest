@@ -7,5 +7,7 @@
     <string name="stop">Stop</string>
     <string name="status_running">Data Collector Running</string>
     <string name="status_stopped">Data Collector Stopped</string>
+    
+    <string name="voice_trigger">Config Have a Rest</string>
 
 </resources>

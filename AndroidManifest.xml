@@ -6,6 +6,7 @@
     
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="com.google.android.glass.permission.DEVELOPMENT"/>
 
     <uses-sdk
         android:minSdkVersion="19"
@@ -19,6 +20,14 @@
         <activity
             android:name="com.example.havearest.MainActivity"
             android:label="@string/app_name" >
+            
+            <intent-filter>
+                <action android:name="com.google.android.glass.action.VOICE_TRIGGER" />
+            </intent-filter>
+            <meta-data
+                android:name="com.google.android.glass.VoiceTrigger"
+                android:resource="@xml/voice_trigger" />
+            
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -35,6 +35,7 @@ public class DataCollectorThread extends Thread implements SensorEventListener {
 	private static final int MIN_REMIND_INTERVAL = 600000; // in millisecond, the minimal interval between remindings
 	private static final float REMIND_THRESHOLD = 10f; // the threshold for discriminating remind or not
 	private static final float MIN_REMIND_THRESHOLD = 0.2f; // if you place your glass on the table, this will stop remind
+	private static final float MAX_DISTANCE = 100;
 	private static final String REMINDER_TEXT = "Have a rest for your neck please!"; // the string you want to hear
 	
 	DataCollectorThread(SensorManager p_sm, TextToSpeech p_tts)
@@ -138,9 +139,9 @@ public class DataCollectorThread extends Thread implements SensorEventListener {
 		while(gravity_iter.hasNext())
 		{
 			float[] reading = gravity_iter.next();
-			gravity_square_sum += Math.pow(reading[0]-last_reading[0],2) +
+			gravity_square_sum += Math.min(Math.pow(reading[0]-last_reading[0],2) +
 						Math.pow(reading[1]-last_reading[1],2) +
-						Math.pow(reading[2]-last_reading[2],2);
+						Math.pow(reading[2]-last_reading[2],2), MAX_DISTANCE);
 			last_reading = reading;
 		}
 		
@@ -149,9 +150,9 @@ public class DataCollectorThread extends Thread implements SensorEventListener {
 		while(acc_iter.hasNext())
 		{
 			float[] reading = acc_iter.next();
-			acc_square_sum += Math.pow(reading[0]-last_reading[0],2) +
+			acc_square_sum += Math.min(Math.pow(reading[0]-last_reading[0],2) +
 						Math.pow(reading[1]-last_reading[1],2) +
-						Math.pow(reading[2]-last_reading[2],2);
+						Math.pow(reading[2]-last_reading[2],2), MAX_DISTANCE);
 			last_reading = reading;
 		}
 		
