@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">HaveARest</string>
+    <string name="hello_world">Use two finger tap gesture to change the data collector status!</string>
+    <string name="resume">Resume</string>
+    <string name="stop">Stop</string>
+    <string name="status_running">Data Collector Running</string>
+    <string name="status_stopped">Data Collector Stopped</string>
+
+</resources>
