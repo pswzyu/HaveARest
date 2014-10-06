@@ -19,5 +19,21 @@
         android:layout_below="@+id/textView2"
         android:text="Status"
         android:textSize="@dimen/font_size" />
+    
+    <TextView
+        android:id="@+id/seekbar_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/tv_status"
+        android:text="@string/seekbar_info"
+        android:textSize="@dimen/font_size" />
+
+    <SeekBar
+        android:id="@+id/threshold_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/seekbar_info" />
 
 </RelativeLayout>

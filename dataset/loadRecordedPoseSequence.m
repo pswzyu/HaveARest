@@ -1,4 +1,4 @@
-function [ output_args ] = loadRecordedPoseSequence( filename )
+function [ grav, acc ] = loadRecordedPoseSequence( filename )
 %LOADRECORDEDPOSESEQUENCE Summary of this function goes here
 %   Detailed explanation goes here
 % load the recorded poses from file
@@ -27,6 +27,8 @@ while ischar(tline) % if we haven't reach eof
 end
 fclose(fid);
 
-output_args = [gravity, linear_acc];
+grav = gravity;
+acc = linear_acc;
+%output_args = [gravity, linear_acc];
 
 end

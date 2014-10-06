@@ -22,20 +22,24 @@ public class DataCollectorThread extends Thread implements SensorEventListener {
 	private TextToSpeech tts;
 	private Sensor mSensorGravity;
 	private Sensor mSensorLinearAcceleration;
-	private int data_collected = 0;
+	private int data_collected_grav = 0;
+	private int data_collected_acc = 0;
 	private String log_string;
 	private ArrayDeque<float[]> gravity_his;
 	private ArrayDeque<float[]> acc_his;
+	private float[] gravity_avg;
+	private float[] acc_avg;
 	private long last_remind_time = 0;
 	
 	private static final int COLLECT_COUNT = 4; // how many readings do we collect in every COLLECT_INTERVAL milliseconds
-	private static final int COLLECT_INTERVAL = 30000; // in millisecond
-	private static final int MIN_HISTORY_FOR_PROC = 40; // minimal data that we can start to process
-	private static final int HISTORY_LENGTH = 80; // how many data we keep
+	private static final int COLLECT_INTERVAL = 15000; // in millisecond
+	private static final int MIN_HISTORY_FOR_PROC = 30; // minimal data that we can start to process
+	private static final int HISTORY_LENGTH = 60; // how many data we keep
 	private static final int MIN_REMIND_INTERVAL = 600000; // in millisecond, the minimal interval between remindings
-	private static final float REMIND_THRESHOLD = 10f; // the threshold for discriminating remind or not
-	private static final float MIN_REMIND_THRESHOLD = 0.2f; // if you place your glass on the table, this will stop remind
+	private static final float REMIND_THRESHOLD = 1.5f; // the threshold for discriminating remind or not
+	private static final float MIN_REMIND_THRESHOLD = 0.5f; // if you place your glass on the table, this will stop remind
 	private static final float MAX_DISTANCE = 100;
+	private static final float GRAVITY_WEIGHT = 0.3f;
 	private static final String REMINDER_TEXT = "Have a rest for your neck please!"; // the string you want to hear
 	
 	DataCollectorThread(SensorManager p_sm, TextToSpeech p_tts)
@@ -47,7 +51,8 @@ public class DataCollectorThread extends Thread implements SensorEventListener {
         mSensorLinearAcceleration = sm.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
         gravity_his = new ArrayDeque<float[]>(HISTORY_LENGTH);
         acc_his = new ArrayDeque<float[]>(HISTORY_LENGTH);
-        
+        gravity_avg = new float[]{0,0,0};
+        acc_avg = new float[]{0,0,0};
 	}
 	
 	@Override
@@ -62,7 +67,7 @@ public class DataCollectorThread extends Thread implements SensorEventListener {
                 if (DataCollectorService.should_collect)
                 {
                 	sm.registerListener(this, mSensorGravity, SensorManager.SENSOR_DELAY_NORMAL);
-                    sm.registerListener(this, mSensorLinearAcceleration, SensorManager.SENSOR_DELAY_NORMAL);
+                    sm.registerListener(this, mSensorLinearAcceleration, SensorManager.SENSOR_DELAY_UI);
                 }
                 sleep(COLLECT_INTERVAL);
             }
@@ -88,35 +93,74 @@ public class DataCollectorThread extends Thread implements SensorEventListener {
 
         switch(type) {
             case Sensor.TYPE_GRAVITY:
-                //Log.d("TAG", "Gravity:"+values[0]+","+values[1]+","+values[2]);
+                Log.d("TAG", "Gravity:"+values[0]+","+values[1]+","+values[2]);
                 log_string += "00-00 00:00:00.000: D/TAG(00000): "+"Gravity:"+values[0]+","+values[1]+","+values[2]+"\n";
                 
-                gravity_his.add(new float[]{values[0], values[1], values[2]});
+                /*gravity_his.add(new float[]{values[0], values[1], values[2]});
                 if (gravity_his.size() > HISTORY_LENGTH)
                 {
                 	gravity_his.pop();
-                }
+                }*/
+                gravity_avg[0] += values[0];
+                gravity_avg[1] += values[1];
+                gravity_avg[2] += values[2];
+                
+                data_collected_grav ++;
+                
                 break;
             case Sensor.TYPE_LINEAR_ACCELERATION:
-            	//Log.d("TAG", "LinearAcc:"+values[0]+","+values[1]+","+values[2]);
+            	Log.d("TAG", "LinearAcc:"+values[0]+","+values[1]+","+values[2]);
             	log_string += "00-00 00:00:00.000: D/TAG(00000): "+"LinearAcc:"+values[0]+","+values[1]+","+values[2]+"\n";
             	
-            	acc_his.add(new float[]{values[0], values[1], values[2]});
+            	/*acc_his.add(new float[]{values[0], values[1], values[2]});
             	if (acc_his.size() > HISTORY_LENGTH)
                 {
                 	acc_his.pop();
-                }
+                }*/
+            	acc_avg[0] += values[0];
+                acc_avg[1] += values[1];
+                acc_avg[2] += values[2];
+                
+                data_collected_acc ++;
+                
                 break;
             default:
                 Log.w("TAG", "Unknown type: " + type);
         }
         
-        data_collected ++;
-		if ( data_collected == COLLECT_COUNT )
+		if ( data_collected_grav + data_collected_acc >= COLLECT_COUNT*2 )
 		{
-			data_collected = 0;
 			// TODO: stop collecting, unregister the listeners
 			sm.unregisterListener(this);
+			
+			Log.d("TAG", "GravityAvg:"+(gravity_avg[0]/data_collected_grav)+","+
+					(gravity_avg[1]/data_collected_grav)+","+ (gravity_avg[2]/data_collected_grav));
+			Log.d("TAG", "LinearAccAvg:"+(acc_avg[0]/data_collected_acc)+","+
+					(acc_avg[1]/data_collected_acc)+","+ (acc_avg[2]/data_collected_acc));
+			
+			
+			gravity_his.add( new float[]{gravity_avg[0]/data_collected_grav,
+					gravity_avg[1]/data_collected_grav, gravity_avg[2]/data_collected_grav} );
+			acc_his.add( new float[]{acc_avg[0]/data_collected_acc,
+					acc_avg[1]/data_collected_acc, acc_avg[2]/data_collected_acc} );
+			
+			gravity_avg[0] = 0;
+			gravity_avg[1] = 0;
+			gravity_avg[2] = 0;
+			acc_avg[0] = 0;
+            acc_avg[1] = 0;
+            acc_avg[2] = 0;
+            data_collected_grav = 0;
+			data_collected_acc = 0;
+            
+            if (gravity_his.size() > HISTORY_LENGTH)
+            {
+            	gravity_his.pop();
+            }
+            if (acc_his.size() > HISTORY_LENGTH)
+            {
+            	acc_his.pop();
+            }
 			
 			processData();
 			
@@ -139,9 +183,9 @@ public class DataCollectorThread extends Thread implements SensorEventListener {
 		while(gravity_iter.hasNext())
 		{
 			float[] reading = gravity_iter.next();
-			gravity_square_sum += Math.min(Math.pow(reading[0]-last_reading[0],2) +
+			gravity_square_sum += Math.sqrt(Math.min( Math.pow(reading[0]-last_reading[0],2) +
 						Math.pow(reading[1]-last_reading[1],2) +
-						Math.pow(reading[2]-last_reading[2],2), MAX_DISTANCE);
+						Math.pow(reading[2]-last_reading[2],2), MAX_DISTANCE));
 			last_reading = reading;
 		}
 		
@@ -150,13 +194,13 @@ public class DataCollectorThread extends Thread implements SensorEventListener {
 		while(acc_iter.hasNext())
 		{
 			float[] reading = acc_iter.next();
-			acc_square_sum += Math.min(Math.pow(reading[0]-last_reading[0],2) +
+			acc_square_sum += Math.sqrt(Math.min(Math.pow(reading[0]-last_reading[0],2) +
 						Math.pow(reading[1]-last_reading[1],2) +
-						Math.pow(reading[2]-last_reading[2],2), MAX_DISTANCE);
+						Math.pow(reading[2]-last_reading[2],2), MAX_DISTANCE));
 			last_reading = reading;
 		}
 		
-		float score = (acc_square_sum + gravity_square_sum) / acc_his.size();
+		float score = ( GRAVITY_WEIGHT * acc_square_sum + (1-GRAVITY_WEIGHT) * gravity_square_sum) / acc_his.size() * 2;
 		Log.d("score", "score:"+score+","+acc_his.size());
 		writeToFile("log_dis", ""+acc_square_sum +","+ gravity_square_sum +"\n");
 		

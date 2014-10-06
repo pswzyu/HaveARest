@@ -9,5 +9,6 @@
     <string name="status_stopped">Data Collector Stopped</string>
     
     <string name="voice_trigger">Config Have a Rest</string>
+    <string name="seekbar_info">Swipe your finger to adjust the alert threshold</string>
 
 </resources>

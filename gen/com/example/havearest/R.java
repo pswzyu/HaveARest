@@ -19,9 +19,11 @@ public final class R {
         public static final int ic_stop=0x7f020002;
     }
     public static final class id {
-        public static final int menu_main_activiry_resume=0x7f090002;
-        public static final int menu_main_activiry_stop=0x7f090003;
+        public static final int menu_main_activiry_resume=0x7f090004;
+        public static final int menu_main_activiry_stop=0x7f090005;
+        public static final int seekbar_info=0x7f090002;
         public static final int textView2=0x7f090000;
+        public static final int threshold_bar=0x7f090003;
         public static final int tv_status=0x7f090001;
     }
     public static final class layout {
@@ -34,6 +36,7 @@ public final class R {
         public static final int app_name=0x7f060000;
         public static final int hello_world=0x7f060001;
         public static final int resume=0x7f060002;
+        public static final int seekbar_info=0x7f060007;
         public static final int status_running=0x7f060004;
         public static final int status_stopped=0x7f060005;
         public static final int stop=0x7f060003;
